@@ -2,3 +2,6 @@ sim_*
 *.vcd
 *.fst
 *.log
+
+# LibreLane generated runs
+config/runs/
