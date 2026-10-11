@@ -56,21 +56,18 @@ module tb_dma;
     // Memory model
     // ==========================
 
-    always_comb begin
-
-        mem_ready = mem_valid;
-
-        if (mem_valid && !mem_we)
-            mem_rdata = memory[mem_addr];
-        else
-            mem_rdata = 32'b0;
-
-    end
-
     always_ff @(posedge clk) begin
 
-        if (mem_valid && mem_we)
-            memory[mem_addr] <= mem_wdata;
+        mem_ready <= 1'b0;
+
+        if (mem_valid) begin
+            mem_ready <= 1'b1;
+
+            if (mem_we)
+                memory[mem_addr] <= mem_wdata;
+            else
+                mem_rdata <= memory[mem_addr];
+        end
 
     end
 
@@ -112,6 +109,8 @@ module tb_dma;
         we = 1'b0;
         addr = 5'b0;
         wdata = 32'b0;
+        mem_ready = 1'b0;
+        mem_rdata = 32'b0;
 
         // Dữ liệu nguồn
         memory[0] = 32'hAAAA_1111;
