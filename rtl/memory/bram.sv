@@ -23,12 +23,18 @@ module bram #(
     input logic [ADDR_WIDTH-1:0] addr_b,
     input logic [DATA_WIDTH-1:0] wdata_b,
     output logic ready_b,
-    output logic [DATA_WIDTH-1:0] rdata_b
+    output logic [DATA_WIDTH-1:0] rdata_b,
+
+    // Instruction fetch
+    input  logic [ADDR_WIDTH-1:0] instr_addr,
+    output logic [DATA_WIDTH-1:0] instr_rdata
 );
 
     localparam DEPTH = 1 << ADDR_WIDTH;
 
     logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
+
+    assign instr_rdata = mem[instr_addr];
 
     always_ff @(posedge clk) begin
 

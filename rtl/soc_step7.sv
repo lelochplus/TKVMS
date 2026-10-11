@@ -157,10 +157,10 @@ module soc_step7 (
         .addr_b    (dma_mem_addr),
         .wdata_b   (dma_mem_wdata),
         .ready_b   (dma_mem_ready),
-        .rdata_b   (dma_mem_rdata)
-    );
+        .rdata_b   (dma_mem_rdata),
 
-    // Instruction fetch
-    assign instr_rdata = memory.mem[instr_addr[11:2]];
+        .instr_addr (instr_addr[11:2]),
+        .instr_rdata(instr_rdata)
+    );
 
 endmodule
