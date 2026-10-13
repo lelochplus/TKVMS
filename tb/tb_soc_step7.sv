@@ -40,6 +40,11 @@ module tb_soc_step7;
         end
     end
 
+initial begin
+    $dumpfile("step7.vcd");
+    $dumpvars(0, tb_soc_step7);
+end
+
     initial begin
         clk = 0;
         rst = 1;
