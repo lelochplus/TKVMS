@@ -52,34 +52,34 @@ module tb_soc_step7;
         // ====================================================
 
         // UART base = 0x2000, stored safely at word 24
-        dut.memory.mem[0] = 32'h06002503; // LW x10,96(x0)
-        dut.memory.mem[1] = 32'h04100593; // ADDI x11,x0,65
-        dut.memory.mem[2] = 32'h00B52023; // SW x11,0(x10)
+        dut.instruction_memory.mem[0] = 32'h06002503; // LW x10,96(x0)
+        dut.instruction_memory.mem[1] = 32'h04100593; // ADDI x11,x0,65
+        dut.instruction_memory.mem[2] = 32'h00B52023; // SW x11,0(x10)
 
         // DMA base = 0x1000, stored safely at word 25
-        dut.memory.mem[3] = 32'h06402603; // LW x12,100(x0)
+        dut.instruction_memory.mem[3] = 32'h06402603; // LW x12,100(x0)
 
         // SRC = 64
-        dut.memory.mem[4] = 32'h04000693; // ADDI x13,x0,64
-        dut.memory.mem[5] = 32'h00D62023; // SW x13,0(x12)
+        dut.instruction_memory.mem[4] = 32'h04000693; // ADDI x13,x0,64
+        dut.instruction_memory.mem[5] = 32'h00D62023; // SW x13,0(x12)
 
         // DST = 80
-        dut.memory.mem[6] = 32'h05000713; // ADDI x14,x0,80
-        dut.memory.mem[7] = 32'h00E62223; // SW x14,4(x12)
+        dut.instruction_memory.mem[6] = 32'h05000713; // ADDI x14,x0,80
+        dut.instruction_memory.mem[7] = 32'h00E62223; // SW x14,4(x12)
 
         // LENGTH = 4
-        dut.memory.mem[8] = 32'h00400793; // ADDI x15,x0,4
-        dut.memory.mem[9] = 32'h00F62423; // SW x15,8(x12)
+        dut.instruction_memory.mem[8] = 32'h00400793; // ADDI x15,x0,4
+        dut.instruction_memory.mem[9] = 32'h00F62423; // SW x15,8(x12)
 
         // CONTROL = 1
-        dut.memory.mem[10] = 32'h00100813; // ADDI x16,x0,1
-        dut.memory.mem[11] = 32'h01062623; // SW x16,12(x12)
+        dut.instruction_memory.mem[10] = 32'h00100813; // ADDI x16,x0,1
+        dut.instruction_memory.mem[11] = 32'h01062623; // SW x16,12(x12)
 
         // NOPs after starting DMA
-        dut.memory.mem[12] = 32'h00000013;
-        dut.memory.mem[13] = 32'h00000013;
-        dut.memory.mem[14] = 32'h00000013;
-        dut.memory.mem[15] = 32'h00000013;
+        dut.instruction_memory.mem[12] = 32'h00000013;
+        dut.instruction_memory.mem[13] = 32'h00000013;
+        dut.instruction_memory.mem[14] = 32'h00000013;
+        dut.instruction_memory.mem[15] = 32'h00000013;
 
         // ====================================================
         // DMA SOURCE DATA

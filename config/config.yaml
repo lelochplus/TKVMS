@@ -6,6 +6,7 @@ VERILOG_FILES:
   - dir::../rtl/bus/internal_bus.sv
   - dir::../rtl/dma/dma_controller.sv
   - dir::../rtl/memory/bram.sv
+  - dir::../rtl/memory/imem.sv
   - dir::../rtl/uart/uart_tx.sv
 
 CLOCK_PORT: clk
@@ -16,6 +17,7 @@ STD_CELL_LIBRARY: sky130_fd_sc_hd
 
 FP_CORE_UTIL: 40
 PL_TARGET_DENSITY: 0.45
+FP_TAPCELL_DIST: 8.0
 
-RUN_CTS: false
-RUN_FILL_INSERTION: false
+RUN_CTS: true
+RUN_FILL_INSERTION: true
