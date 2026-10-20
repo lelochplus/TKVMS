@@ -13,13 +13,23 @@ module rv32i_cpu (
     output logic [31:0] data_addr,
     output logic [31:0] data_wdata,
     input  logic [31:0] data_rdata,
-    input  logic        data_ready
+    input  logic        data_ready,
+
+    // DMA interrupt
+    input  logic        dma_irq
 );
 
     logic [31:0] pc;
     logic [31:0] instr;
 
     logic [31:0] regs [0:31];
+
+    // Machine-mode interrupt CSRs
+    logic [31:0] csr_mtvec;
+    logic [31:0] csr_mepc;
+    logic        csr_mie;
+    logic        csr_mpie;
+    logic        csr_meie;
 
     logic [31:0] alu_result;
     logic [31:0] load_data;
@@ -70,6 +80,19 @@ module rv32i_cpu (
          instr[30:21],
          1'b0};
 
+    // CSR read
+    logic [31:0] csr_rdata;
+
+    always_comb begin
+        case (instr[31:20])
+            12'h305: csr_rdata = csr_mtvec;
+            12'h341: csr_rdata = csr_mepc;
+            12'h300: csr_rdata = {24'b0, csr_mpie, 3'b0, csr_mie, 3'b0};
+            12'h304: csr_rdata = {20'b0, csr_meie, 11'b0};
+            default: csr_rdata = 32'b0;
+        endcase
+    end
+
     assign instr_addr = pc;
 
     always_comb begin
@@ -99,6 +122,12 @@ module rv32i_cpu (
             rd         <= 5'b0;
             state      <= FETCH;
 
+            csr_mtvec  <= 32'b0;
+            csr_mepc   <= 32'b0;
+            csr_mie    <= 1'b0;
+            csr_mpie   <= 1'b0;
+            csr_meie   <= 1'b0;
+
             for (i = 0; i < 32; i = i + 1)
                 regs[i] <= 32'b0;
         end
@@ -109,8 +138,18 @@ module rv32i_cpu (
             case (state)
 
                 FETCH: begin
-                    instr <= instr_rdata;
-                    state <= EXEC;
+                    // External interrupt: DMA -> CPU
+                    if (dma_irq && csr_mie && csr_meie) begin
+                        csr_mepc <= pc;
+                        csr_mpie <= csr_mie;
+                        csr_mie  <= 1'b0;
+                        pc       <= csr_mtvec;
+                        state    <= FETCH;
+                    end
+                    else begin
+                        instr <= instr_rdata;
+                        state <= EXEC;
+                    end
                 end
 
                 EXEC: begin
@@ -236,6 +275,59 @@ module rv32i_cpu (
                             regs[rd_w] <= pc + 4;
                             pc <= pc + imm_j;
                             state <= FETCH;
+                        end
+
+                        // CSR / SYSTEM
+                        7'b1110011: begin
+                            // MRET = 0x30200073
+                            if (instr == 32'h30200073) begin
+                                csr_mie <= csr_mpie;
+                                csr_mpie <= 1'b1;
+                                pc <= csr_mepc;
+                                state <= FETCH;
+                            end
+                            else if (funct3 == 3'b001) begin
+                                // CSRRW
+                                case (instr[31:20])
+                                    12'h305: csr_mtvec <= rs1_data;
+                                    12'h341: csr_mepc  <= rs1_data;
+                                    12'h300: begin
+                                        csr_mie  <= rs1_data[3];
+                                        csr_mpie <= rs1_data[7];
+                                    end
+                                    12'h304: csr_meie <= rs1_data[11];
+                                    default: ;
+                                endcase
+
+                                if (rd_w != 0)
+                                    regs[rd_w] <= csr_rdata;
+
+                                pc <= pc + 4;
+                                state <= FETCH;
+                            end
+                            else if (funct3 == 3'b010) begin
+                                // CSRRS
+                                if (rd_w != 0)
+                                    regs[rd_w] <= csr_rdata;
+
+                                case (instr[31:20])
+                                    12'h305: csr_mtvec <= csr_mtvec | rs1_data;
+                                    12'h341: csr_mepc  <= csr_mepc  | rs1_data;
+                                    12'h300: begin
+                                        csr_mie  <= csr_mie  | rs1_data[3];
+                                        csr_mpie <= csr_mpie | rs1_data[7];
+                                    end
+                                    12'h304: csr_meie <= csr_meie | rs1_data[11];
+                                    default: ;
+                                endcase
+
+                                pc <= pc + 4;
+                                state <= FETCH;
+                            end
+                            else begin
+                                pc <= pc + 4;
+                                state <= FETCH;
+                            end
                         end
 
                         default: begin

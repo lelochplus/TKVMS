@@ -28,7 +28,9 @@ module soc_step7 (
         .data_addr  (data_addr),
         .data_wdata (data_wdata),
         .data_rdata (data_rdata),
-        .data_ready (data_ready)
+        .data_ready (data_ready),
+
+        .dma_irq    (dma_irq)
     );
 
     // Internal Bus
@@ -140,6 +142,10 @@ module soc_step7 (
         .tx    (uart_tx)
     );
 
+    // Dummy signals for legacy BRAM instruction ports
+    logic [9:0]  bram_instr_addr_dummy;
+    logic [31:0] bram_instr_rdata_dummy;
+
     // BRAM
     bram memory (
         .clk       (clk),
@@ -157,7 +163,9 @@ module soc_step7 (
         .addr_b    (dma_mem_addr),
         .wdata_b   (dma_mem_wdata),
         .ready_b   (dma_mem_ready),
-        .rdata_b   (dma_mem_rdata)
+        .rdata_b   (dma_mem_rdata),
+        .instr_addr (bram_instr_addr_dummy),
+        .instr_rdata(bram_instr_rdata_dummy)
     );
 
     // Instruction memory riêng
